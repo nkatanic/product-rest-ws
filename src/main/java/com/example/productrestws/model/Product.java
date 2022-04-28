@@ -25,6 +25,10 @@ public class Product {
     @Column(name = "is_available")
     private boolean isAvailable;
 
+    public Product(){
+        
+    }
+
     public Product(String code, String name, float priceHrk, String description, boolean isAvailable) {
         this.code = code;
         this.name = name;
