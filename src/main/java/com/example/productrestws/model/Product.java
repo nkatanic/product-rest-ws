@@ -32,11 +32,12 @@ public class Product {
     public Product(String code, String name, float priceHrk, String description, boolean isAvailable) {
         this.code = code;
         this.name = name;
-        this.priceHrk = priceHrk;
-        // to-do: Calculate priceEur using HNB API
-        this.priceEur = 0; 
+        this.priceHrk = priceHrk;        
         this.description = description;
         this.isAvailable = isAvailable;
+
+        // Set by the controller after calling the HNB API
+        this.priceEur = 0; 
     }
     
     public long getId() {
@@ -71,8 +72,7 @@ public class Product {
         return this.priceEur;
     }
 
-    // to-do: Should be calculated by calling the HNB API
-    private void setPriceEur(float priceEur) {
+    public void setPriceEur(float priceEur) {
         this.priceEur = priceEur;
     }
 

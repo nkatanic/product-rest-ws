@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import com.example.productrestws.model.Product;
 import com.example.productrestws.repository.ProductRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api")
@@ -25,12 +29,20 @@ public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
+	private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+
     @PostMapping("/products")
 	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
 		try {
-			Product newProduct = productRepository
-					.save(new Product(product.getCode(), product.getName(), product.getPriceHrk(), product.getDescription(), product.getIsAvailable()));
-			return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+			Product newProduct = new Product(product.getCode(), product.getName(), product.getPriceHrk(), product.getDescription(), product.getIsAvailable());
+			
+			// Calculate price in EUR
+			float priceEur = this.calculatePriceEur(newProduct.getPriceHrk());
+			
+			newProduct.setPriceEur(priceEur);
+			Product responseProduct = productRepository.save(newProduct);
+
+			return new ResponseEntity<>(responseProduct, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -79,10 +91,15 @@ public class ProductController {
 	public ResponseEntity<Product> updateProduct(@PathVariable("id") long id, @RequestBody Product product) {
 		Optional<Product> productData = productRepository.findById(id);
 		if (productData.isPresent()) {
+			
 			Product updatedProduct = productData.get();
 			updatedProduct.setCode(product.getCode());
 			updatedProduct.setName(product.getName());
 			updatedProduct.setPriceHrk(product.getPriceHrk());
+
+			float priceEur = this.calculatePriceEur(updatedProduct.getPriceHrk());
+			updatedProduct.setPriceEur(priceEur);
+
 			updatedProduct.setDescription(product.getDescription());
 			updatedProduct.setIsAvailable(product.getIsAvailable());
 	
@@ -110,6 +127,19 @@ public class ProductController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	private float calculatePriceEur(float priceHrk) {
+		
+		RestTemplate restTemplate = new RestTemplate();
+		String hnbApiUrl = "https://api.hnb.hr/tecajn/v1?valuta=EUR";		
+		HnbCurrency[] hnbCurrency = restTemplate.getForObject(hnbApiUrl, HnbCurrency[].class);
+		String conversionRateString = hnbCurrency[0].getConversionRate();
+		conversionRateString = conversionRateString.replace(',', '.');
+		float conversionRate = Float.parseFloat(conversionRateString);
+		float priceEur = priceHrk / conversionRate;
+
+		return priceEur;
 	}
 
 }
