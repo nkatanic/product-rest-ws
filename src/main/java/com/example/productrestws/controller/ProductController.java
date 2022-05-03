@@ -1,8 +1,14 @@
 package com.example.productrestws.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import org.springframework.validation.FieldError;
 
 import com.example.productrestws.model.Product;
 import com.example.productrestws.repository.ProductRepository;
@@ -12,18 +18,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api")
+@Validated
 public class ProductController {
     
     @Autowired
@@ -32,7 +43,7 @@ public class ProductController {
 	private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
     @PostMapping("/products")
-	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+	public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
 		try {
 			Product newProduct = new Product(product.getCode(), product.getName(), product.getPriceHrk(), product.getDescription(), product.getIsAvailable());
 			
@@ -65,7 +76,7 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{id}")
-	public ResponseEntity<Product> getProductById(@PathVariable("id") long id) {
+	public ResponseEntity<Product> getProductById(@PathVariable("id") @Min(1) long id) {
 		Optional<Product> productData = productRepository.findById(id);
 		if (productData.isPresent()) {
 			return new ResponseEntity<>(productData.get(), HttpStatus.OK);
@@ -88,7 +99,7 @@ public class ProductController {
 	}
 
 	@PutMapping("/products/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable("id") long id, @RequestBody Product product) {
+	public ResponseEntity<Product> updateProduct(@PathVariable("id") @Min(1) long id, @Valid @RequestBody Product product) {
 		Optional<Product> productData = productRepository.findById(id);
 		if (productData.isPresent()) {
 			
@@ -110,7 +121,7 @@ public class ProductController {
 	}
 
 	@DeleteMapping("/products/{id}")
-	public ResponseEntity<HttpStatus> deleteProduct(@PathVariable("id") long id) {
+	public ResponseEntity<HttpStatus> deleteProduct(@PathVariable("id") @Min(1) long id) {
 		try {
 			productRepository.deleteById(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -142,4 +153,15 @@ public class ProductController {
 		return priceEur;
 	}
 
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    	Map<String, String> errors = new HashMap<>();
+    	ex.getBindingResult().getAllErrors().forEach((error) -> {
+        String fieldName = ((FieldError) error).getField();
+        String errorMessage = error.getDefaultMessage();
+        errors.put(fieldName, errorMessage);
+    });
+    	return errors;
+	}
 }
