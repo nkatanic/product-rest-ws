@@ -26,7 +26,7 @@ public class Product {
     private float priceHrk;
 
     @Column(name = "price_eur")
-    @PositiveOrZero(message = "priceHrk must be >= 0")
+    @PositiveOrZero(message = "priceEur must be >= 0")
     private float priceEur;
 
     @NotBlank(message = "Description is mandatory field")
