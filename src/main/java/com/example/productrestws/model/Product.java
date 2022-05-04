@@ -2,7 +2,6 @@ package com.example.productrestws.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
@@ -23,12 +22,10 @@ public class Product {
     private String name;
 
     @Column(name = "price_hrk")
-    @NotNull(message = "priceHrk cannot be null")
     @PositiveOrZero(message = "priceHrk must be >= 0")
     private float priceHrk;
 
     @Column(name = "price_eur")
-    @NotNull(message = "priceHrk cannot be null")
     @PositiveOrZero(message = "priceHrk must be >= 0")
     private float priceEur;
 
@@ -37,13 +34,13 @@ public class Product {
 
     @Column(name = "is_available")
     @NotNull(message = "IsAvailable cannot be null")
-    private boolean isAvailable;
+    private Boolean isAvailable;
 
     public Product(){
         
     }
 
-    public Product(String code, String name, float priceHrk, String description, boolean isAvailable) {
+    public Product(String code, String name, float priceHrk, String description, Boolean isAvailable) {
         this.code = code;
         this.name = name;
         this.priceHrk = priceHrk;        
@@ -98,11 +95,11 @@ public class Product {
         this.description = description;
     }
 
-    public boolean getIsAvailable() {
+    public Boolean getIsAvailable() {
         return this.isAvailable;
     }
 
-    public void setIsAvailable(boolean isAvailable) {
+    public void setIsAvailable(Boolean isAvailable) {
         this.isAvailable = isAvailable;
     }
 }
