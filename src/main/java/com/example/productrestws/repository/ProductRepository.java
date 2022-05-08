@@ -5,5 +5,5 @@ import com.example.productrestws.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-   List<Product> findByIsAvailable(boolean isAvailable);
+   List<Product> findByIsAvailable(Boolean isAvailable);
 }

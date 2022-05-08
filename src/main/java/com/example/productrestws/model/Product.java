@@ -50,6 +50,18 @@ public class Product {
       // Calculated and set by the controller after calling the HNB API
       this.priceEur = 0; 
    }
+
+   public Product(long id, String code, String name, float priceHrk, String description, Boolean isAvailable) {
+      this.id = id;
+      this.code = code;
+      this.name = name;
+      this.priceHrk = priceHrk;        
+      this.description = description;
+      this.isAvailable = isAvailable;
+
+      // Calculated and set by the controller after calling the HNB API
+      this.priceEur = 0; 
+   }
     
    public long getId() {
       return this.id;
