@@ -33,7 +33,7 @@ public class Product {
    private String description;
 
    @Column(name = "is_available")
-   @NotNull(message = "IsAvailable cannot be null")
+   @NotNull(message = "isAvailable cannot be null")
    private Boolean isAvailable;
 
    public Product() {      

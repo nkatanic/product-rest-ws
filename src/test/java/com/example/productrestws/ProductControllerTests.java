@@ -160,4 +160,76 @@ public class ProductControllerTests {
          .andExpect(status().isNoContent())
          .andDo(print());
    }
+
+   
+   @Test
+   void validationCodeInvalidSize() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE1234", "Laptop Toshiba", 2500, "Rabljeni laptop Toshiba", true);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.code").value("Code size must be equal to 10"))
+         .andDo(print());
+   }
+
+   @Test
+   void validationCodeMandatory() throws Exception {      
+      Product newProduct = new Product(1, "", "Laptop Toshiba", 2500, "Rabljeni laptop Toshiba", true);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.code").value("Code is mandatory field"))
+         .andDo(print());
+   }
+   
+   @Test
+   void validationNameMandatory() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE12345", "", 2500, "Rabljeni laptop Toshiba", true);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.name").value("Name is mandatory field"))
+         .andDo(print());
+   }
+
+   @Test
+   void validationPriceHrkPositiveOrZero() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE12345", "Laptop Toshiba", -1, "Rabljeni laptop Toshiba", true);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.priceHrk").value("priceHrk must be >= 0"))
+         .andDo(print());
+   }
+
+   @Test
+   void validationPriceEurPositiveOrZero() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE12345", "Laptop Toshiba", 2500, "Rabljeni laptop Toshiba", true);
+      newProduct.setPriceEur(-1);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.priceEur").value("priceEur must be >= 0"))
+         .andDo(print());
+   }
+
+   @Test
+   void validationDescriptionMandatory() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE12345", "Laptop Toshiba", 2500, "", true);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.description").value("Description is mandatory field"))
+         .andDo(print());
+   }
+      
+   @Test
+   void validationIsAvailableNotNull() throws Exception {      
+      Product newProduct = new Product(1, "ABCDE12345", "Laptop Toshiba", 2500, "Rabljeni laptop Toshiba", null);
+
+      mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+         .content(objectMapper.writeValueAsString(newProduct)))
+         .andExpect(jsonPath("$.isAvailable").value( "isAvailable cannot be null"))
+         .andDo(print());
+   }
 }
